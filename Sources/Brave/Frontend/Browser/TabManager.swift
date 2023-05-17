@@ -93,6 +93,7 @@ class TabManager: NSObject {
   private let syncedTabsQueue = DispatchQueue(label: "synced-tabs-queue")
   private var syncTabsTask: DispatchWorkItem?
   private var metricsHeartbeat: Timer?
+  private let windowId: UUID
   
   /// The property returning only existing tab is NTP for current mode
   var isBrowserEmptyForCurrentMode: Bool {
@@ -107,9 +108,10 @@ class TabManager: NSObject {
     }
   }
 
-  init(prefs: Prefs, rewards: BraveRewards?, tabGeneratorAPI: BraveTabGeneratorAPI?) {
+  init(windowId: UUID, prefs: Prefs, rewards: BraveRewards?, tabGeneratorAPI: BraveTabGeneratorAPI?) {
     assert(Thread.isMainThread)
 
+    self.windowId = windowId
     self.prefs = prefs
     self.navDelegate = TabManagerNavDelegate()
     self.rewards = rewards
@@ -441,7 +443,7 @@ class TabManager: NSObject {
                       PrivilegedRequest(url: url) as URLRequest :
                       URLRequest(url: url)
       $0.createWebview()
-      $0.loadRequest(URLRequest(url: url))
+      $0.loadRequest(request)
     }
     
     // Select the most recent.
@@ -497,7 +499,8 @@ class TabManager: NSObject {
 
     let isPrivate = tab.type == .private
     if !isPrivate {
-      SessionTab.createIfNeeded(tabId: tab.id,
+      SessionTab.createIfNeeded(windowId: windowId,
+                                tabId: tab.id,
                                 title: Strings.newTab,
                                 tabURL: request?.url ?? TabManager.ntpInteralURL)
       
@@ -918,6 +921,7 @@ class TabManager: NSObject {
       savedTabs = SessionTab.all()
     }
 
+    savedTabs = savedTabs.filter({ $0.sessionWindow?.windowId == windowId })
     if savedTabs.isEmpty { return nil }
 
     var tabToSelect: Tab?

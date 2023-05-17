@@ -13,6 +13,7 @@ protocol TabsBarViewControllerDelegate: AnyObject {
   func tabsBarDidSelectTab(_ tabsBarController: TabsBarViewController, _ tab: Tab)
   func tabsBarDidLongPressAddTab(_ tabsBarController: TabsBarViewController, button: UIButton)
   func tabsBarDidSelectAddNewTab(_ isPrivate: Bool)
+  func tabsBarDidSelectAddNewWindow(_ isPrivate: Bool)
   func tabsBarDidChangeReaderModeVisibility(_ isHidden: Bool)
 
 }
@@ -120,6 +121,10 @@ class TabsBarViewController: UIViewController {
       })
 
     newTabMenu.append(openNewTab)
+    
+    newTabMenu.append(UIAction(title: "New Window", image: UIImage(systemName: "window.horizontal.closed"), handler: UIAction.deferredActionHandler { [unowned self] _ in
+      self.delegate?.tabsBarDidSelectAddNewWindow(PrivateBrowsingManager.shared.isPrivateBrowsing)
+    }))
 
     plusButton.menu = UIMenu(title: "", identifier: nil, children: newTabMenu)
     privateModeCancellable = PrivateBrowsingManager.shared

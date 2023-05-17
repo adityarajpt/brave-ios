@@ -157,6 +157,7 @@ public class BrowserViewController: UIViewController {
   var displayedPopoverController: UIViewController?
   var updateDisplayedPopoverProperties: (() -> Void)?
 
+  public let windowId: UUID
   let profile: Profile
   let braveCore: BraveCoreMain
   let tabManager: TabManager
@@ -266,12 +267,14 @@ public class BrowserViewController: UIViewController {
   var topToolbarDidPressReloadTask: Task<(), Never>?
 
   public init(
+    windowId: UUID,
     profile: Profile,
     diskImageStore: DiskImageStore?,
     braveCore: BraveCoreMain,
     migration: Migration?,
     crashedLastSession: Bool
   ) {
+    self.windowId = windowId
     self.profile = profile
     self.braveCore = braveCore
     self.bookmarkManager = BookmarkManager(bookmarksAPI: braveCore.bookmarksAPI)
@@ -288,6 +291,7 @@ public class BrowserViewController: UIViewController {
 
     // Initialize TabManager
     self.tabManager = TabManager(
+      windowId: windowId,
       prefs: profile.prefs,
       rewards: rewards,
       tabGeneratorAPI: braveCore.tabGeneratorAPI)
@@ -1137,6 +1141,25 @@ public class BrowserViewController: UIViewController {
       show(toast: toast, afterWaiting: ButtonToastUX.toastDelay)
     }
     showQueuedAlertIfAvailable()
+    
+    let isPrivateBrowsing = SessionWindow.from(windowId: windowId)?.isPrivate == true
+    var userActivity = view.window?.windowScene?.userActivity
+    if userActivity == nil {
+      userActivity = BrowserState.userActivity(for: windowId, isPrivate: isPrivateBrowsing)
+    } else {
+      userActivity?.targetContentIdentifier = windowId.uuidString
+      userActivity?.addUserInfoEntries(from: ["WindowID": windowId.uuidString,
+                                             "isPrivate": isPrivateBrowsing])
+    }
+    
+    
+    view.window?.windowScene?.userActivity = userActivity
+    view.window?.windowScene?.session.userInfo = ["WindowID": windowId.uuidString,
+                                                  "isPrivate": isPrivateBrowsing]
+    
+    for session in UIApplication.shared.openSessions {
+      UIApplication.shared.requestSceneSessionRefresh(session)
+    }
   }
 
   /// Whether or not to show the playlist onboarding callout this session
@@ -1155,6 +1178,7 @@ public class BrowserViewController: UIViewController {
     super.viewWillDisappear(animated)
 
     rewards.ledger?.selectedTabId = 0
+    view.window?.windowScene?.userActivity = nil
   }
 
   /// A layout guide defining where the favorites and NTP overlay are placed
@@ -2391,6 +2415,21 @@ extension BrowserViewController: PresentingModalViewControllerDelegate {
 extension BrowserViewController: TabsBarViewControllerDelegate {
   func tabsBarDidSelectAddNewTab(_ isPrivate: Bool) {
     openBlankNewTab(attemptLocationFieldFocus: false, isPrivate: isPrivate)
+  }
+  
+  func tabsBarDidSelectAddNewWindow(_ isPrivate: Bool) {
+    let activity = BrowserState.userActivity(for: UUID(), isPrivate: false)
+    
+    let options = UIScene.ActivationRequestOptions().then {
+      $0.requestingScene = view.window?.windowScene
+    }
+    
+    UIApplication.shared.requestSceneSessionActivation(nil,
+                                                       userActivity: activity,
+                                                       options: options,
+                                                       errorHandler: { error in
+      Logger.module.error("Error creating new window: \(error)")
+    })
   }
 
   func tabsBarDidSelectTab(_ tabsBarController: TabsBarViewController, _ tab: Tab) {

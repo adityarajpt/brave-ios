@@ -24,7 +24,7 @@ public class PlaylistCarplayManager: NSObject {
   private var carplaySessionConfiguration: CPSessionConfiguration?
   let onCarplayUIChangedToRoot = PassthroughSubject<Void, Never>()
 
-  public var browserController: BrowserViewController?
+  public weak var browserController: BrowserViewController?
 
   var currentlyPlayingItemIndex = -1
   var currentPlaylistItem: PlaylistInfo?
