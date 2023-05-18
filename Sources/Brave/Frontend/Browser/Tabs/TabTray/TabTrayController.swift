@@ -252,6 +252,29 @@ class TabTrayController: LoadingViewController {
       // Place the search bar in the navigation item's title view.
       $0.titleView = searchBarView
       $0.hidesSearchBarWhenScrolling = true
+      
+      $0.leftBarButtonItem = UIBarButtonItem(title: "Tab Groups", image: nil, menu: UIMenu(title: "Tab Groups", image: nil, children: [
+        UIAction(title: "New Empty Tab Group", image: nil, handler: { [weak self] _ in
+          guard let self = self else { return }
+          
+          let alert = UIAlertController(title: "New Tab Group", message: "Enter a name for this tab group", preferredStyle: .alert)
+          alert.addTextField(configurationHandler: { textField in
+            textField.placeholder = "Tab Group"
+          })
+          
+          alert.addAction(UIAlertAction(title: "Cancel", style: .destructive, handler: { _ in
+            
+          }))
+          
+          alert.addAction(UIAlertAction(title: "Save", style: .default, handler: { _ in
+            let window = SessionWindow.from(windowId: self.tabManager.windowId)
+            let group = SessionTabGroup(context: DataController.swiftUIContext, sessionWindow: window!, index: 0, title: alert.textFields?[0].text ?? "Invalid Group")
+            
+          }))
+          
+          self.present(alert, animated: true)
+        })
+      ]))
     }
 
     tabManager.addDelegate(self)

@@ -15,6 +15,36 @@ extension TabTrayController: UICollectionViewDelegate {
     tabTraySearchController.isActive = false
     dismiss(animated: true)
   }
+  
+  func collectionView(_ collectionView: UICollectionView, contextMenuConfigurationForItemAt indexPath: IndexPath, point: CGPoint) -> UIContextMenuConfiguration? {
+    return self.collectionView(collectionView, contextMenuConfigurationForItemsAt: [indexPath], point: point)
+  }
+  
+  func collectionView(_ collectionView: UICollectionView, contextMenuConfigurationForItemsAt indexPaths: [IndexPath], point: CGPoint) -> UIContextMenuConfiguration? {
+    return UIContextMenuConfiguration(actionProvider: { suggestedActions in
+      if indexPaths.count == 0 {
+        // Construct an empty-space menu.
+        return UIMenu(children: [
+          UIAction(title: "New Tab") { _ in /* Implement the action. */ },
+          UIAction(title: "New Private Tab") { _ in /* Implement the action. */ }
+        ])
+      } else if indexPaths.count == 1 {
+        // Construct a single-item menu.
+        return UIMenu(children: [
+          UIMenu(title: "Move to Tab Group", children: [UIAction(title: "Move to Tab Group") { _ in /* Implement the action. */ },
+                            UIAction(title: "New Tab Group") { _ in /* Implement the action. */ }]),
+          UIAction(title: "Close Tab", attributes: .destructive) { _ in /* Implement the action. */ },
+          UIAction(title: "Close Other Tabs", attributes: .destructive) { _ in /* Implement the action. */ }
+        ])
+      } else {
+        // Construct a multiple-item menu.
+        return UIMenu(children: [
+          UIAction(title: "Move to Tab Group") { _ in /* Implement the action. */ },
+          UIAction(title: "Delete", attributes: .destructive) { _ in /* Implement the action. */ }
+        ])
+      }
+    })
+  }
 }
 
 // MARK: UICollectionViewDragDelegate

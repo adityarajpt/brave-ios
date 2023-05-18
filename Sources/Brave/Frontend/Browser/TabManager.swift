@@ -93,7 +93,7 @@ class TabManager: NSObject {
   private let syncedTabsQueue = DispatchQueue(label: "synced-tabs-queue")
   private var syncTabsTask: DispatchWorkItem?
   private var metricsHeartbeat: Timer?
-  private let windowId: UUID
+  let windowId: UUID
   
   /// The property returning only existing tab is NTP for current mode
   var isBrowserEmptyForCurrentMode: Bool {
