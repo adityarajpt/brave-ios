@@ -7,6 +7,7 @@ import Foundation
 import Data
 import Combine
 import BraveCore
+import BraveShields
 
 /// An actor that handles the downloading of custom filter lists which are sourced via a URL
 actor FilterListCustomURLDownloader: ObservableObject {
@@ -70,11 +71,16 @@ actor FilterListCustomURLDownloader: ObservableObject {
       do {
         let filterSet = try String(contentsOf: downloadResult.fileURL, encoding: .utf8)
         let jsonRules = AdblockEngine.contentBlockerRules(fromFilterSet: filterSet)
+        let type = ContentBlockerManager.BlocklistType.customFilterList(uuid: uuid)
         
         try await ContentBlockerManager.shared.compile(
           encodedContentRuleList: jsonRules,
-          for: .customFilterList(uuid: uuid),
+          for: type,
           options: .all
+        )
+        
+        ContentBlockerManager.log.debug(
+          "Loaded custom filter list content blockers: \(String(describing: type))"
         )
       } catch {
         ContentBlockerManager.log.error(
