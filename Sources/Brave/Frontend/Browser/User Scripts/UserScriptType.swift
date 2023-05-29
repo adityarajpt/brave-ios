@@ -34,7 +34,7 @@ enum UserScriptType: Hashable {
     let fetchNewClassIdRulesThrottlingMs: Int?
     /// These are agressive hide selectors that will get automatically processed when the script loads.
     /// Agressive selectors may never be unhidden even on standard mode
-    let agressiveSelectors: Set<String>
+    let aggressiveSelectors: Set<String>
     /// These are standard hide selectors that will get automatically processed when the script loads.
     /// Standard selectors may be unhidden on standard mode if they contain 1p content
     let standardSelectors: Set<String>

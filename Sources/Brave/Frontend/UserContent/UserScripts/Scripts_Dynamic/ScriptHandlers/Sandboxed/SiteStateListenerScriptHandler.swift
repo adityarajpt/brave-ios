@@ -100,7 +100,7 @@ class SiteStateListenerScriptHandler: TabContentScript {
   
   @MainActor private func makeArgs(from modelTuples: [CachedAdBlockEngine.CosmeticFilterModelTuple], frameURL: URL, isAggressive: Bool) throws -> String {
     var standardSelectors: Set<String> = []
-    var agressiveSelectors: Set<String> = []
+    var aggressiveSelectors: Set<String> = []
     var styleSelectors: [String: Set<String>] = [:]
     
     for modelTuple in modelTuples {
@@ -108,8 +108,8 @@ class SiteStateListenerScriptHandler: TabContentScript {
         styleSelectors[key] = styleSelectors[key]?.union(Set(values)) ?? Set(values)
       }
       
-      if modelTuple.source.isAlwaysAgressive(given: FilterListStorage.shared.filterLists) {
-        agressiveSelectors = agressiveSelectors.union(modelTuple.model.hideSelectors)
+      if modelTuple.source.isAlwaysAggressive {
+        aggressiveSelectors = aggressiveSelectors.union(modelTuple.model.hideSelectors)
       } else {
         standardSelectors = standardSelectors.union(modelTuple.model.hideSelectors)
       }
@@ -132,7 +132,7 @@ class SiteStateListenerScriptHandler: TabContentScript {
       firstSelectorsPollingDelayMs: nil,
       switchToSelectorsPollingThreshold: 1000,
       fetchNewClassIdRulesThrottlingMs: 100,
-      agressiveSelectors: agressiveSelectors,
+      aggressiveSelectors: aggressiveSelectors,
       standardSelectors: standardSelectors,
       styleSelectors: Set(styleSelectorObjects)
     )

@@ -70,21 +70,17 @@ class CosmeticFiltersScriptHandler: TabContentScript {
         }
         
         var standardSelectors: Set<String> = []
-        var agressiveSelectors: Set<String> = []
+        var aggressiveSelectors: Set<String> = []
         for tuple in selectorArrays {
-          let isAgressive = tuple.source.isAlwaysAgressive(
-            given: FilterListStorage.shared.filterLists
-          )
-          
-          if isAgressive {
-            agressiveSelectors = agressiveSelectors.union(tuple.selectors)
+          if tuple.source.isAlwaysAggressive {
+            aggressiveSelectors = aggressiveSelectors.union(tuple.selectors)
           } else {
             standardSelectors = standardSelectors.union(tuple.selectors)
           }
         }
         
         replyHandler([
-          "agressiveSelectors": Array(agressiveSelectors),
+          "aggressiveSelectors": Array(aggressiveSelectors),
           "standardSelectors": Array(standardSelectors)
         ], nil)
       }

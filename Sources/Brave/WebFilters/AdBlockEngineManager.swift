@@ -17,7 +17,7 @@ public actor AdBlockEngineManager: Sendable {
   enum Source: Hashable {
     case adBlock
     case cosmeticFilters
-    case filterList(uuid: String)
+    case filterList(uuid: String, isAlwaysAggressive: Bool)
     case filterListURL(uuid: String)
     
     /// The order of this source relative to other sources.
@@ -40,7 +40,7 @@ public actor AdBlockEngineManager: Sendable {
     /// 2. Regional filter lists (i.e. filter lists that have a language associated with them)
     ///
     /// All other filter lists are agressive (i.e. are always hidden regardless of 1p status)
-    @MainActor func isAlwaysAgressive(given filterLists: [FilterList]) -> Bool {
+    var isAlwaysAggressive: Bool {
       switch self {
       case .adBlock, .cosmeticFilters:
         // Our default filter lists are not agressive
@@ -48,14 +48,8 @@ public actor AdBlockEngineManager: Sendable {
       case .filterListURL:
         // Custom filter lists are always agressive
         return true
-      case .filterList(let uuid):
-        // We can only unhide filter lists that are region specific.
-        // Non-regional lists such as cookie consent notices are not unhidable due to 1p checks
-        guard let filterList = filterLists.first(where: { $0.uuid == uuid }) else {
-          return false
-        }
-        
-        return filterList.isAlwaysAggressive
+      case .filterList(_, let isAlwaysAggressive):
+        return isAlwaysAggressive
       }
     }
   }
