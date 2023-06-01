@@ -155,7 +155,8 @@ extension UserAssetsStore {
       rpcService: MockJsonRpcService(),
       keyringService: MockKeyringService(),
       assetRatioService: MockAssetRatioService(),
-      ipfsApi: TestIpfsAPI()
+      ipfsApi: TestIpfsAPI(),
+      userAssetManager: TestableWalletUserAssetManager()
     )
   }
 }
@@ -173,7 +174,7 @@ extension AccountActivityStore {
       blockchainRegistry: MockBlockchainRegistry(),
       solTxManagerProxy: BraveWallet.TestSolanaTxManagerProxy.previewProxy,
       ipfsApi: TestIpfsAPI(),
-      walletUserAssetManager: TestableWalletUserAssetManager()
+      userAssetManager: TestableWalletUserAssetManager()
     )
   }
 }
@@ -224,7 +225,8 @@ extension TransactionsActivityStore {
     assetRatioService: MockAssetRatioService(),
     blockchainRegistry: MockBlockchainRegistry(),
     txService: MockTxService(),
-    solTxManagerProxy: BraveWallet.TestSolanaTxManagerProxy.previewProxy
+    solTxManagerProxy: BraveWallet.TestSolanaTxManagerProxy.previewProxy,
+    userAssetManager: TestableWalletUserAssetManager()
   )
 }
 
